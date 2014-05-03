@@ -216,7 +216,6 @@ bool CBlockTreeDB::LoadBlockIndexGuts()
     // Load mapBlockIndex
     while (pcursor->Valid()) {
         boost::this_thread::interruption_point();
-        try {
         std::pair<char, uint256> key;
         if (pcursor->GetKey(key) && key.first == 'b') {
             CDiskBlockIndex diskindex;
