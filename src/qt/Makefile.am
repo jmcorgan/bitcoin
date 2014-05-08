@@ -7,8 +7,8 @@ AM_CPPFLAGS += -I$(top_srcdir)/src \
   $(QR_CFLAGS)
 bin_PROGRAMS = bitcoin-qt
 noinst_LIBRARIES = libbitcoinqt.a
-SUBDIRS = $(BUILD_TEST_QT)
-DIST_SUBDIRS = test
+SUBDIRS = . $(BUILD_TEST_QT)
+DIST_SUBDIRS = . test
 
 # bitcoin qt core #
 QT_TS = \
@@ -25,7 +25,6 @@ QT_TS = \
   locale/bitcoin_cs.ts \
   locale/bitcoin_cy.ts \
   locale/bitcoin_da.ts \
-  locale/bitcoin_de_AT.ts \
   locale/bitcoin_de.ts \
   locale/bitcoin_el_GR.ts \
   locale/bitcoin_en.ts \
@@ -212,7 +211,8 @@ BITCOIN_QT_H = \
   walletframe.h \
   walletmodel.h \
   walletmodeltransaction.h \
-  walletview.h
+  walletview.h \
+  winshutdownmonitor.h
 
 RES_ICONS = \
   res/icons/add.png \
@@ -276,10 +276,10 @@ BITCOIN_QT_CPP = \
   qvalidatedlineedit.cpp \
   qvaluecombobox.cpp \
   rpcconsole.cpp \
-  signverifymessagedialog.cpp \
   splashscreen.cpp \
   trafficgraphwidget.cpp \
-  utilitydialog.cpp
+  utilitydialog.cpp \
+  winshutdownmonitor.cpp
 
 if ENABLE_WALLET
 BITCOIN_QT_CPP += \
@@ -298,6 +298,7 @@ BITCOIN_QT_CPP += \
   recentrequeststablemodel.cpp \
   sendcoinsdialog.cpp \
   sendcoinsentry.cpp \
+  signverifymessagedialog.cpp \
   transactiondesc.cpp \
   transactiondescdialog.cpp \
   transactionfilterproxy.cpp \

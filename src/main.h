@@ -60,6 +60,8 @@ static const int COINBASE_MATURITY = 100;
 static const unsigned int LOCKTIME_THRESHOLD = 500000000; // Tue Nov  5 00:53:20 1985 UTC
 /** Maximum number of script-checking threads allowed */
 static const int MAX_SCRIPTCHECK_THREADS = 16;
+/** -par default (number of script-checking threads, 0 = auto) */
+static const int DEFAULT_SCRIPTCHECK_THREADS = 0;
 /** Number of blocks that can be requested at any given time from a single peer. */
 static const int MAX_BLOCKS_IN_TRANSIT_PER_PEER = 128;
 /** Timeout in seconds before considering a block download peer unresponsive. */
@@ -95,6 +97,7 @@ extern bool fReindex;
 extern bool fBenchmark;
 extern int nScriptCheckThreads;
 extern bool fTxIndex;
+extern bool fAddrIndex;
 extern unsigned int nCoinCacheSize;
 
 // Minimum disk space required - used in CheckDiskSpace()
@@ -251,9 +254,57 @@ struct CDiskTxPos : public CDiskBlockPos
         CDiskBlockPos::SetNull();
         nTxOffset = 0;
     }
+    
+    friend bool operator==(const CDiskTxPos &a, const CDiskTxPos &b) {
+        return (a.nFile == b.nFile && a.nPos == b.nPos && a.nTxOffset == b.nTxOffset);
+    }
+
+    friend bool operator!=(const CDiskTxPos &a, const CDiskTxPos &b) {
+        return !(a == b);
+    }
+
+    friend bool operator<(const CDiskTxPos &a, const CDiskTxPos &b) {
+        return  (a.nFile < b.nFile || (
+                (a.nFile == b.nFile) && (a.nPos < b.nPos || (
+                                        (a.nPos == b.nPos) && (a.nTxOffset < b.nTxOffset)))));
+    }
 };
 
+struct CExtDiskTxPos : public CDiskTxPos
+{
+    unsigned int nHeight;
 
+    IMPLEMENT_SERIALIZE(
+        READWRITE(*(CDiskTxPos*)this);
+        READWRITE(VARINT(nHeight));
+    )
+
+    CExtDiskTxPos(const CDiskTxPos &pos, int nHeightIn) : CDiskTxPos(pos), nHeight(nHeightIn) {
+    }
+ 
+    CExtDiskTxPos() {
+        SetNull();
+    }
+
+    void SetNull() {
+        CDiskTxPos::SetNull();
+        nHeight = 0;
+    }
+
+    friend bool operator==(const CExtDiskTxPos &a, const CExtDiskTxPos &b) {
+        return (a.nHeight == b.nHeight && a.nFile == b.nFile && a.nPos == b.nPos && a.nTxOffset == b.nTxOffset);
+    }
+  
+    friend bool operator!=(const CExtDiskTxPos &a, const CExtDiskTxPos &b) {
+        return !(a == b);
+    }
+
+    friend bool operator<(const CExtDiskTxPos &a, const CExtDiskTxPos &b) {
+        if (a.nHeight < b.nHeight) return true;
+        if (a.nHeight > b.nHeight) return false;
+        return ((const CDiskTxPos)a < (const CDiskTxPos)b);
+    }
+};
 
 enum GetMinFee_mode
 {
@@ -379,7 +430,7 @@ public:
             filein >> hashChecksum;
         }
         catch (std::exception &e) {
-            return error("%s : Deserialize or I/O error - %s", __PRETTY_FUNCTION__, e.what());
+            return error("%s : Deserialize or I/O error - %s", __func__, e.what());
         }
 
         // Verify checksum
@@ -582,8 +633,10 @@ public:
 
 /** Functions for disk access for blocks */
 bool WriteBlockToDisk(CBlock& block, CDiskBlockPos& pos);
+bool ReadTransaction(CTransaction& tx, const CDiskTxPos &pos, uint256 &hashBlock);
 bool ReadBlockFromDisk(CBlock& block, const CDiskBlockPos& pos);
 bool ReadBlockFromDisk(CBlock& block, const CBlockIndex* pindex);
+bool FindTransactionsByDestination(const CTxDestination &dest, std::set<CExtDiskTxPos> &setpos);
 
 
 /** Functions for validating blocks and updating the block tree */

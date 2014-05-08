@@ -160,8 +160,17 @@ Array RPCConvertValues(const std::string &strMethod, const std::vector<std::stri
     if (strMethod == "listunspent"            && n > 0) ConvertTo<boost::int64_t>(params[0]);
     if (strMethod == "listunspent"            && n > 1) ConvertTo<boost::int64_t>(params[1]);
     if (strMethod == "listunspent"            && n > 2) ConvertTo<Array>(params[2]);
+    if (strMethod == "listallunspent"         && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "listallunspent"         && n > 2) ConvertTo<boost::int64_t>(params[2]);
+    if (strMethod == "listallunspent"         && n > 3) ConvertTo<boost::int64_t>(params[3]);
+    if (strMethod == "listallunspent"         && n > 4) ConvertTo<boost::int64_t>(params[4]);
+    if (strMethod == "getallbalance"          && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "getallbalance"          && n > 2) ConvertTo<boost::int64_t>(params[2]);
     if (strMethod == "getblock"               && n > 1) ConvertTo<bool>(params[1]);
     if (strMethod == "getrawtransaction"      && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "listalltransactions"    && n > 1) ConvertTo<boost::int64_t>(params[1]);
+    if (strMethod == "listalltransactions"    && n > 2) ConvertTo<boost::int64_t>(params[2]);
+    if (strMethod == "listalltransactions"    && n > 3) ConvertTo<boost::int64_t>(params[3]);
     if (strMethod == "createrawtransaction"   && n > 0) ConvertTo<Array>(params[0]);
     if (strMethod == "createrawtransaction"   && n > 1) ConvertTo<Object>(params[1]);
     if (strMethod == "signrawtransaction"     && n > 1) ConvertTo<Array>(params[1], true);
@@ -265,11 +274,12 @@ std::string HelpMessageCli(bool mainProgram)
     strUsage += "  -rpcconnect=<ip>       " + _("Send commands to node running on <ip> (default: 127.0.0.1)") + "\n";
     strUsage += "  -rpcport=<port>        " + _("Connect to JSON-RPC on <port> (default: 8332 or testnet: 18332)") + "\n";
     strUsage += "  -rpcwait               " + _("Wait for RPC server to start") + "\n";
-    strUsage += "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n";
-    strUsage += "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n";
 
     if(mainProgram)
     {
+        strUsage += "  -rpcuser=<user>        " + _("Username for JSON-RPC connections") + "\n";
+        strUsage += "  -rpcpassword=<pw>      " + _("Password for JSON-RPC connections") + "\n";
+
         strUsage += "\n" + _("SSL options: (see the Bitcoin Wiki for SSL setup instructions)") + "\n";
         strUsage += "  -rpcssl                " + _("Use OpenSSL (https) for JSON-RPC connections") + "\n";
     }

@@ -35,6 +35,13 @@ static leveldb::Options GetOptions(size_t nCacheSize) {
     return options;
 }
 
+CLevelDBIterator::~CLevelDBIterator() { delete piter; }
+bool CLevelDBIterator::Valid() { return piter->Valid(); }
+void CLevelDBIterator::SeekToFirst() { piter->SeekToFirst(); }
+void CLevelDBIterator::SeekToLast() { piter->SeekToLast(); }
+void CLevelDBIterator::Next() { piter->Next(); }
+void CLevelDBIterator::Prev() { piter->Prev(); }
+
 CLevelDBWrapper::CLevelDBWrapper(const boost::filesystem::path &path, size_t nCacheSize, bool fMemory, bool fWipe) {
     penv = NULL;
     readoptions.verify_checksums = true;
@@ -51,7 +58,7 @@ CLevelDBWrapper::CLevelDBWrapper(const boost::filesystem::path &path, size_t nCa
             LogPrintf("Wiping LevelDB in %s\n", path.string());
             leveldb::DestroyDB(path.string(), options);
         }
-        boost::filesystem::create_directory(path);
+        TryCreateDirectory(path);
         LogPrintf("Opening LevelDB in %s\n", path.string());
     }
     leveldb::Status status = leveldb::DB::Open(options, path.string(), &pdb);
